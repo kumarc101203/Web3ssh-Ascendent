@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETH Payment Area</title>
+  <style>
+    body {
+      background: #f6f8fa;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .payment-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 32px 24px 32px;
+      min-width: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .payment-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: #3730a3;
+      letter-spacing: 1px;
+    }
+    .payment-label {
+      font-size: 1rem;
+      margin: 12px 0 4px 0;
+      color: #555;
+      align-self: flex-start;
+    }
+    #connectWalletBtn, #fundEthBtn, #showTxBtn {
+      background: #4f46e5;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 24px;
+      margin-top: 18px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+      width: 100%;
+    }
+    #connectWalletBtn:hover, #fundEthBtn:hover, #showTxBtn:hover {
+      background: #3730a3;
+    }
+    #recipientAddress, #ethAmount {
+      margin-top: 4px;
+      margin-bottom: 8px;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
+      background: #f9fafb;
+    }
+    #txInfo {
+      margin-top: 20px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      padding: 16px;
+      width: 100%;
+      font-size: 0.97rem;
+      color: #222;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+  <div class="payment-card">
+    <div class="payment-title">ETH Payment Area</div>
+    <button id="connectWalletBtn">Connect Wallet</button>
+    <label class="payment-label" for="recipientAddress">Recipient Address</label>
+    <input type="text" id="recipientAddress" placeholder="Recipient Address" />
+    <label class="payment-label" for="ethAmount">Amount (ETH)</label>
+    <input type="number" id="ethAmount" placeholder="Amount in ETH" min="0" step="0.0001" />
+    <button id="fundEthBtn">Fund ETH</button>
+    <button id="showTxBtn">Show Last Transaction</button>
+    <div id="txInfo"></div>
+  </div>
+  <script src="js/app.js"></script>
+</body>
+</html>

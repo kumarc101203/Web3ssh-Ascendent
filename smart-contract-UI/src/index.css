@@ -1,3 +1,105 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light Mode Variables */
+    --bg-mesh-1: #e0f2fe; /* light sky */
+    --bg-mesh-2: #f3e8ff; /* light purple */
+    --bg-mesh-3: #fce7f3; /* light pink */
+    
+    --glass-bg: rgba(255, 255, 255, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.6);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+    
+    --skeuo-outer: 6px 6px 12px #cad4e0, -6px -6px 12px #ffffff;
+    --skeuo-inner: inset 4px 4px 8px #cad4e0, inset -4px -4px 8px #ffffff;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+  }
+  
+  .dark {
+    /* Dark Mode Variables */
+    --bg-mesh-1: #0f172a; /* deep slate */
+    --bg-mesh-2: #312e81; /* deep indigo */
+    --bg-mesh-3: #4c1d95; /* deep purple */
+    
+    --glass-bg: rgba(15, 23, 42, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    
+    --skeuo-outer: 6px 6px 16px rgba(0,0,0,0.6), -6px -6px 16px rgba(255,255,255,0.05);
+    --skeuo-inner: inset 4px 4px 10px rgba(0,0,0,0.7), inset -4px -4px 10px rgba(255,255,255,0.05);
+
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+  }
+}
+
+@layer components {
+  /* Dynamic Liquid Background (Applies to main container) */
+  .liquid-container {
+    background: linear-gradient(45deg, var(--bg-mesh-1), var(--bg-mesh-2), var(--bg-mesh-3));
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    min-height: 100vh;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+  }
+
+  /* Glassmorphism Panels */
+  .glass-panel {
+    @apply backdrop-blur-2xl rounded-2xl transition-all duration-300;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Skeuomorphism Buttons */
+  .skeuo-button {
+    @apply transition-all duration-300 font-medium rounded-xl flex items-center justify-center gap-2 px-6 py-3 cursor-pointer;
+    box-shadow: var(--skeuo-outer);
+  }
+  
+  .skeuo-button:hover {
+    transform: translateY(-2px);
+  }
+
+  .skeuo-button:active {
+    box-shadow: var(--skeuo-inner);
+    transform: translateY(1px);
+  }
+
+  /* Skeuomorphism Inputs */
+  .skeuo-input {
+    @apply w-full px-4 py-3 rounded-xl border-none outline-none transition-all duration-300;
+    background: transparent;
+    box-shadow: var(--skeuo-inner);
+    color: var(--text-primary);
+  }
+  
+  .skeuo-input:focus {
+    box-shadow: var(--skeuo-inner), 0 0 0 2px rgba(59, 130, 246, 0.5); /* Focus ring */
+  }
+
+  /* Text Gradients & Glows */
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+
+  .text-title {
+    color: var(--text-primary);
+  }
+  
+  .text-body {
+    color: var(--text-secondary);
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}

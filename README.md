@@ -1,118 +1,147 @@
-# 🌐⛓️ Web3SSH-Ascendant: AI-Arbitrator: Decentralized Escrow with AI-Powered Work Evaluation
+# 🌐⛓️ Web3SSH-Ascendant: Web3 AI Escrow
+
 ## 🚀 Overview
 
-Traditional smart contracts lack the ability to resolve complex or subjective disputes—such as evaluating freelance work quality or interpreting agreement terms. **Web3SSH-Ascendant** addresses this limitation by integrating AI-driven analysis with blockchain-based enforcement for fast, fair, and transparent conflict resolution.
+**Web3SSH-Ascendant** is a high-fidelity, identity-locked decentralized escrow platform. It bridges the gap between subjective work evaluation and objective blockchain enforcement by integrating **Gemini AI Repository Auditing** with **Chainlink Functions** for automated, evidence-based settlements.
+
+Traditional smart contracts lack the ability to resolve complex or subjective disputes—such as evaluating freelance work quality or interpreting agreement terms. Web3SSH-Ascendant addresses this limitation by integrating AI-driven analysis with blockchain-based enforcement for fast, fair, and transparent conflict resolution.
 
 ---
 
-## 🔍 The Problem
+## ✨ Key Features
 
-Most existing solutions are:
-- ❌ **Too centralized** – Single arbitrators introduce bias.
-- 🐢 **Too slow/costly** – DAO votes are inefficient.
-- ⚖️ **Too simplistic** – Limited to binary outcomes.
-
----
-
-## 💡 Our Solution
-
-A hybrid **AI + Blockchain** framework designed for freelancer platforms that:
-
-- 🧠 **Analyzes submitted evidence**  
-  Text, images, code, and other deliverables are reviewed using advanced AI algorithms.
-
-- ⚖️ **Determines the fairest outcome**  
-  Combines AI evaluation with decentralized validator consensus to ensure unbiased resolution.
-
-- 🔐 **Executes automatic payouts**  
-  Smart contracts handle fund distribution based on the resolved outcome — fast, secure, and transparent.
+- 🔒 **Identity-Locked Security**: All functional modules (Services, Disputes, Freelancer Dashboard) are locked behind a mandatory **MetaMask** connection.
+- 🛡️ **Forced Account Selector**: Connection flows force the MetaMask account selector to appear every time, preventing silent session re-use and ensuring correct identity verification.
+- 🛑 **Manual Security Controls**: Instant "Disconnect" functionality allows users to revoke session access immediately, reducing network exposure.
+- 🛰️ **Real-Data AI Auditing**: The **Deep-Discovery AI Engine** performs real-time repository audits by physically "scouting" the target GitHub repository's file tree and key source contents.
+- 🧠 **Evidence-Based Evaluation**: Gemini AI analyzes actual code snippets to verify feature implementation.
+- ⚖️ **Oracle-Driven Settlements**: Chainlink Functions act as the bridge, triggering smart contract payouts only once the AI has verified the work deliverables.
 
 ---
-## 🔧 FLOW
+
+## 🔄 FLOW
 ```text
 ┌──────────────────────┐    ┌──────────────────────┐    ┌───────────────────────┐
 │                      │    │                      │    │                       │
-│   Client Smart       │    │  Chainlink Oracle    │    │   Vertex AI           │
-│   Contract           │    │  Network             │    │   Processing          │
+│   Web3 Platform      │    │  Chainlink Oracle    │    │   Gemini AI           │
+│   (Wallet Guarded)   │    │  Network             │    │   Auditor             │
 │                      │    │                      │    │                       │
-│  - Escrow logic      │◄──►│  - Request           │◄──►│  - Evidence analysis  │
-│  - Fund locking      │    │    dispatching       │    │  - Contextual         │
-│  - Ruling            │    │  - Response          │    │    understanding      │
-│    enforcement       │    │    aggregation       │    │  - Decision scoring   │
-│                      │    │  - Proof delivery    │    │                       │
+│  - Identity Lock     │◄──►│  - Request           │◄──►│  - GitHub Scouting    │
+│  - Escrow logic      │    │    dispatching       │    │  - Code Evidence      │
+│  - Manual Security   │    │  - Response          │    │    verification       │
+│                      │    │    aggregation       │    │  - Scoring & Verdict  │
 └──────────────────────┘    └──────────────────────┘    └───────────────────────┘
 ```
 
 ---
 
-## ⚙️ How It Works
+## 🛠️ Technical Architecture & Tech Stack
 
-1. **Dispute Initiation**
-   - Disputing parties submit evidence
-   - Funds are locked in escrow
+### 🖥️ Frontend
+- **Framework**: React.js with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS, GSAP for animations
+- **Web3 Provider**: MetaMask / ethers.js
 
-2. **AI-Powered Evaluation**
-   - AI reviews and scores the content objectively
-   - NLP, CV, and logic models ensure nuanced understanding
+### ⚙️ Backend (AI Engine)
+- **Framework**: FastAPI (Python)
+- **AI Model**: Google Gemini (1.5 Flash / 2.0 Flash) with auto-discovery and OpenAI GPT-4o fallback options.
+- **External Integration**: GitHub API for live repository scouting.
 
-3. **Blockchain Enforcement**
-   - Chainlink oracles validate AI decisions
-   - Smart contracts automate fund release based on outcome
-
----
-
-## 🌟 Key Features
-
-- ✅ **Objective Decisions** – AI trained on real-world dispute data  
-- ⚡ **Fast Resolution** – Settle in minutes, not days  
-- 💰 **Cost-Efficient** – Minimal human arbitration overhead  
-- 🔒 **Tamper-Proof** – Fully on-chain and transparent  
-- 🔧 **Flexible** – Use for freelancing, NFTs, DAOs, DeFi, and more
+### ⛓️ Smart Contracts & Oracle
+- **Contracts**: Solidity
+- **Environment**: Hardhat
+- **Network**: Sepolia Testnet
+- **Oracle Layer**: Chainlink Functions for secure off-chain computation.
 
 ---
 
-## 🛠️ Technical Architecture
+## 📁 Folder Structure
 
-### 🔧 Core Tech Stack
-
-| Category        | Technologies |
-|----------------|--------------|
-| **Frontend**    | React, Vite, Tailwind CSS |
-| **Backend/API** | Flask, Firebase |
-| **Smart Contracts** | Solidity, Hardhat |
-| **ML & AI**     | YOLOv8, PyTorch, scikit-learn, spaCy, NLTK |
-| **Data Viz**    | Matplotlib, Seaborn, Plotly |
-| **Document Processing** | PyPDF2, pdfplumber, python-docx, openpyxl |
-| **OCR & CV**    | Tesseract, OpenCV, Pillow |
-| **Infrastructure** | Streamlit (for prototyping), Chainlink (oracle layer) |
-
-### 🧠 Core AI Algorithms
-
-- **Computer Vision**
-  - YOLOv8 – Object detection
-  - OpenCV – Blur, edge, and composition analysis
-  - OCR – Tesseract for text extraction
-- **NLP**
-  - spaCy, NLTK – Tokenization, text normalization
-  - Regex – Pattern matching
-- **Text Similarity**
-  - SequenceMatcher, Jaccard Index
-- **Scoring System**
-  - Weighted evaluation:  
-    - Object Detection – 30%  
-    - OCR/Text – 25%  
-    - Visual Analysis – 25%  
-    - Layout & Composition – 20%
+```text
+Web3SSH-Ascendant/
+├── src/                          # Frontend React Application
+│   ├── components/               # Reusable UI components (WalletGuard, Header, etc.)
+│   ├── pages/                    # Main application pages
+│   ├── context/                  # React Context providers
+│   └── main.tsx                  # Application entry point
+├── smart-contract-UI/
+│   └── backend/                  # Python FastAPI Backend
+│       ├── gemini_analyzer.py    # Core AI Analysis & GitHub Scouter logic
+│       ├── requirements.txt      # Python dependencies
+│       └── test_scouter.py       # Helper script for testing repository scanning
+├── hardhat/                      # Smart Contract Development Environment
+│   ├── contracts/                # Solidity smart contracts
+│   ├── scripts/                  # Deployment scripts
+│   └── test/                     # Contract test suites
+├── .env                          # Environment variables configuration
+├── package.json                  # Node.js dependencies and scripts
+├── vite.config.ts                # Vite configuration
+└── README.md                     # Project documentation
+```
 
 ---
 
-## 🧠 AI Model Capabilities
+## ⚙️ Installation & Setup
 
-- **Evaluate quality** of submitted work (design/code/docs)
-- **Extract insights** from text, PDFs, images
-- **Score completeness** and relevance
-- **Support partial settlements** based on objective metrics
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Python](https://www.python.org/) (3.9 or higher)
+- MetaMask Extension installed in your browser
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/your-username/web3ssh-ASCendant--main.git
+cd web3ssh-ASCendant--main
+```
+
+### 2. Configure Environment Variables
+Create a `.env` file in the root directory and add the following configuration:
+
+```env
+# Firebase Configuration
+VITE_FIREBASE_API_KEY=your_firebase_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
+VITE_FIREBASE_PROJECT_ID=your_firebase_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Backend URL
+VITE_BACKEND_URL=http://localhost:8000
+
+# AI Models API Keys
+GEMINI_API_KEY=your_google_gemini_api_key
+OPENAI_API_KEY=your_openai_api_key # Optional: If you prefer to use OpenAI
+```
+
+### 3. Setup Frontend
+Install Node.js dependencies and start the Vite development server:
+```bash
+npm install
+npm run dev
+```
+The frontend will be accessible at `http://localhost:5173`.
+
+### 4. Setup Backend (AI Engine)
+Open a new terminal window, navigate to the backend directory, install Python dependencies, and start the FastAPI server:
+```bash
+cd smart-contract-UI/backend
+pip install -r requirements.txt
+python gemini_analyzer.py
+```
+The backend server will run at `http://localhost:8000`.
 
 ---
 
-> **Web3SSH-Ascendant** brings trust, speed, and intelligence to Web3 disputes—bridging the gap between smart contracts and real-world judgment.
+## 💡 How It Works (The Escrow Flow)
+
+1. **Dispute Initiation & Agreement**: Disputing parties agree on terms, and funds are locked securely in the smart contract escrow.
+2. **Work Submission**: The freelancer submits their deliverable (a GitHub repository URL).
+3. **Data-Driven Evaluation**: The backend `GitHubScouter` fetches the repository structure and specific source code snippets. Gemini AI performs a high-fidelity audit against project requirements to ensure no functionality was missed.
+4. **Blockchain Enforcement**: Chainlink Functions validate the AI's objective decision and trigger the necessary payout on-chain.
+
+---
+
+> **Web3SSH-Ascendant** brings trust, speed, and physical code evidence to Web3 disputes—bridging the gap between smart contracts and real-world judgment for a secure and accurate decentralized future.

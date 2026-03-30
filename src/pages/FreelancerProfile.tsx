@@ -1,7 +1,8 @@
-import React, { useState, useContext } from 'react';
+import { useState, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, Heart, Share2, MapPin, Clock, Award, Shield, Eye, MessageCircle, CheckCircle, Calendar, DollarSign, Zap, X, Mail, Phone, Globe, Video, Send } from 'lucide-react';
+import { ArrowLeft, Star, Heart, Share2, MapPin, Clock, Award, Shield, MessageCircle, CheckCircle, Calendar, DollarSign, Zap, X, Mail, Phone, Globe, Video, Send } from 'lucide-react';
 import { AuthContext } from '../App';
+import { connectWallet } from '../utils/web3';
 
 const freelancerData = {
   1: {
@@ -495,14 +496,6 @@ const ScheduleCallModal = ({ freelancer, isOpen, onClose }: { freelancer: any, i
     }
 
     // Here you would typically integrate with Zoom API or calendar service
-    const meetingDetails = {
-      freelancer: freelancer.name,
-      date: selectedDate,
-      time: selectedTime,
-      type: meetingType,
-      agenda: agenda
-    };
-
     alert(`Meeting scheduled with ${freelancer.name} on ${selectedDate} at ${selectedTime} via ${meetingType.toUpperCase()}!`);
     onClose();
   };
@@ -642,12 +635,137 @@ const ScheduleCallModal = ({ freelancer, isOpen, onClose }: { freelancer: any, i
   );
 };
 
+// Smart Contract Modal Component
+const SmartContractModal = ({ freelancer, isOpen, onClose }: { freelancer: any, isOpen: boolean, onClose: () => void }) => {
+  const [amount, setAmount] = useState('0.5');
+  const [status, setStatus] = useState<'idle'|'connecting'|'deploying'|'success'>('idle');
+  const [txHash, setTxHash] = useState('');
+
+  if (!isOpen) return null;
+
+  const handleDeploy = async () => {
+    try {
+      setStatus('connecting');
+      await connectWallet(); // Request MetaMask connection
+      
+      setStatus('deploying');
+      setTimeout(() => {
+        setTxHash('0x' + Array.from({length: 64}, () => Math.floor(Math.random()*16).toString(16)).join(''));
+        setStatus('success');
+      }, 3500); // Simulate block mining time
+    } catch (error) {
+      console.error(error);
+      setStatus('idle');
+      alert('Wallet connection failed. Please ensure MetaMask is installed and unlocked.');
+    }
+  };
+
+  const resetAndClose = () => {
+    setStatus('idle');
+    setTxHash('');
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-gray-100 transform transition-all">
+        <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 rounded-t-2xl">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-800">Initiate Web3 Escrow</h2>
+            <button onClick={resetAndClose} className="p-2 hover:bg-green-100 rounded-full transition-colors">
+              <X className="h-5 w-5 text-gray-500 hover:text-gray-800" />
+            </button>
+          </div>
+        </div>
+        
+        <div className="p-8 space-y-6">
+          {status === 'success' ? (
+            <div className="flex flex-col items-center justify-center text-center space-y-4 py-8">
+              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center shadow-inner mb-2">
+                <CheckCircle className="h-10 w-10 text-green-600" />
+              </div>
+              <h3 className="text-2xl font-bold text-gray-900">Escrow Locked!</h3>
+              <p className="text-gray-600 flex flex-col space-y-2">
+                <span>Your funds are safely secured in the Smart Contract.</span>
+                <span className="text-sm font-mono bg-gray-100 py-1 px-3 rounded-lg border border-gray-200 truncate w-full max-w-sm mx-auto">{txHash}</span>
+              </p>
+              <button onClick={resetAndClose} className="mt-4 bg-green-600 text-white font-bold px-8 py-3 rounded-xl shadow-lg hover:bg-green-700 hover:scale-105 transition-all">
+                Close Dashboard
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Contract Info */}
+              <div className="bg-gray-50 rounded-xl p-5 border border-gray-200 shadow-inner">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-gray-500 text-sm font-semibold uppercase tracking-wider">Freelancer</span>
+                  <span className="text-gray-900 font-bold">{freelancer.name}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-500 text-sm font-semibold uppercase tracking-wider">Wallet</span>
+                  <span className="text-gray-900 font-mono text-sm">0x8B3...4b92</span>
+                </div>
+              </div>
+
+              {/* Amount Input */}
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-green-600" /> Lock Funds (ETH)
+                </h3>
+                <div className="relative">
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    disabled={status !== 'idle'}
+                    className="w-full text-2xl font-bold text-gray-900 py-4 pl-6 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 bg-white shadow-sm"
+                  />
+                  <div className="absolute right-6 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">ETH</div>
+                </div>
+                <p className="text-sm text-gray-500 mt-2 flex items-center gap-1">
+                  <Shield className="h-4 w-4 text-gray-400" /> Funds will be AI-Arbitrated
+                </p>
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={handleDeploy}
+                disabled={status !== 'idle' || !amount}
+                className={`w-full py-4 rounded-xl flex items-center justify-center space-x-3 transition-all duration-300 font-bold shadow-lg text-lg ${
+                  status === 'idle'
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-xl'
+                    : 'bg-green-100 text-green-800 cursor-wait'
+                }`}
+              >
+                {status === 'idle' && (
+                  <>
+                    <Zap className="h-6 w-6" />
+                    <span>Connect Wallet & Lock Funds</span>
+                  </>
+                )}
+                {status === 'connecting' && <span>Awaiting MetaMask...</span>}
+                {status === 'deploying' && (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-green-800"></div>
+                    <span>Mining Smart Contract Transaction...</span>
+                  </>
+                )}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const FreelancerProfile = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [showContactModal, setShowContactModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [showSmartContractModal, setShowSmartContractModal] = useState(false);
   const user = useContext(AuthContext);
   const freelancer = user ? {
     ...freelancerData[1], // fallback to first static profile for demo
@@ -656,11 +774,6 @@ const FreelancerProfile = () => {
     avatar: user.photoURL || freelancerData[1].avatar,
     // add more fields as needed
   } : freelancerData[Number(id) as keyof typeof freelancerData];
-
-  const handleSmartContract = () => {
-    // Navigate to smart contract page
-    window.location.href = 'http://localhost:5173/';
-  };
 
   if (!freelancer) {
     return (
@@ -933,7 +1046,7 @@ const FreelancerProfile = () => {
                     <span>Schedule Call</span>
                   </button>
                   <button 
-                    onClick={() => handleSmartContract()}
+                    onClick={() => setShowSmartContractModal(true)}
                     className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-lg flex items-center justify-center space-x-2"
                   >
                     <Zap className="h-5 w-5" />
@@ -979,6 +1092,11 @@ const FreelancerProfile = () => {
         freelancer={freelancer} 
         isOpen={showScheduleModal} 
         onClose={() => setShowScheduleModal(false)} 
+      />
+      <SmartContractModal 
+        freelancer={freelancer} 
+        isOpen={showSmartContractModal} 
+        onClose={() => setShowSmartContractModal(false)} 
       />
     </div>
   );

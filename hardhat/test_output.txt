@@ -1,0 +1,246 @@
+﻿[dotenv@17.3.1] injecting env (0) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+
+
+  FreelanceEscrow ΓÇö AI-Triggered Autonomous Payout
+    Deployment & Initial State
+      Γ£ö Should deploy with correct initial state
+    Work Submission
+      Γ£ö Freelancer can submit work
+      Γ£ö Client cannot submit work
+      Γ£ö Cannot submit work twice
+    Evaluation Request
+      Γ£ö Can request evaluation after work is submitted
+      Γ£ö Cannot request evaluation before work is submitted
+      Γ£ö Stranger cannot request evaluation
+      Γ£ö Emits EvaluationRequested event
+    Score < 50 ΓåÆ Full Refund to Client
+      1) Score 40: Client gets 100% refund
+      Γ£ö Score 0: Client gets 100% refund
+    Score 50-89 ΓåÆ Proportional Split
+      2) Score 75: Freelancer gets 75%, Client gets 25%
+      Γ£ö Score 50: Freelancer gets 50%, Client gets 50%
+    Score >= 90 ΓåÆ Full Payment to Freelancer
+      Γ£ö Score 95: Freelancer gets 100%
+      Γ£ö Score 90: Freelancer gets 100% (boundary)
+      Γ£ö Score 100: Freelancer gets 100%
+    Security Hardening
+      3) Rejects score > 100
+      Γ£ö Cannot resolve twice (repeated callback)
+      Γ£ö Oracle error resets state to WorkSubmitted
+    Events
+      Γ£ö Emits FundsDistributed with correct values
+
+  Lock
+    Deployment
+      4) Should set the right unlockTime
+      5) Should set the right owner
+      6) Should receive and store the funds to lock
+      7) Should fail if the unlockTime is not in the future
+    Withdrawals
+      Validations
+        8) Should revert with the right error if called too soon
+        9) Should revert with the right error if called from another account
+        10) Shouldn't fail if the unlockTime has arrived and the owner calls it
+      Events
+        11) Should emit an event on withdrawals
+      Transfers
+        12) Should transfer the funds to the owner
+
+
+  16 passing (614ms)
+  12 failing
+
+  1) FreelanceEscrow ΓÇö AI-Triggered Autonomous Payout
+       Score < 50 ΓåÆ Full Refund to Client
+         Score 40: Client gets 100% refund:
+
+      AssertionError: expected 999998103434657779 to equal 1000000000000000000.
+      + expected - actual
+
+      -999998103434657779
+      +1000000000000000000
+      
+      at Context.<anonymous> (test\FreelanceEscrow.test.js:118:51)
+
+  2) FreelanceEscrow ΓÇö AI-Triggered Autonomous Payout
+       Score 50-89 ΓåÆ Proportional Split
+         Score 75: Freelancer gets 75%, Client gets 25%:
+
+      AssertionError: expected 249999387378648480 to equal 250000000000000000.
+      + expected - actual
+
+      -249999387378648480
+      +250000000000000000
+      
+      at Context.<anonymous> (test\FreelanceEscrow.test.js:153:51)
+
+  3) FreelanceEscrow ΓÇö AI-Triggered Autonomous Payout
+       Security Hardening
+         Rejects score > 100:
+     HardhatChaiMatchersDecodingError: There was an error decoding '0000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000003543616c6c6261636b206661696c65643a20590e1cd600000000000000000000000000000000000000000000000000000000000000650000000000000000000000' as a string
+      at decodeReturnData (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-chai-matchers\src\internal\reverted\utils.ts:75:13)
+      at onError (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-chai-matchers\src\internal\reverted\reverted.ts:80:49)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\FreelanceEscrow.test.js:223:7)
+  
+      Caused by: Error: deferred error during ABI decoding triggered accessing index 0
+          at throwError (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\ethers\src.ts\abi\coders\abstract-coder.ts:33:21)
+          at Object.get (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\ethers\src.ts\abi\coders\abstract-coder.ts:143:29)
+          at decodeReturnData (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-chai-matchers\src\internal\reverted\utils.ts:73:60)
+          at onError (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-chai-matchers\src\internal\reverted\reverted.ts:80:49)
+          at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\FreelanceEscrow.test.js:223:7)
+
+  4) Lock
+       Deployment
+         Should set the right unlockTime:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:30:36)
+
+  5) Lock
+       Deployment
+         Should set the right owner:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:36:31)
+
+  6) Lock
+       Deployment
+         Should receive and store the funds to lock:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:42:38)
+
+  7) Lock
+       Deployment
+         Should fail if the unlockTime is not in the future:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:54:20)
+
+  8) Lock
+       Withdrawals
+         Validations
+           Should revert with the right error if called too soon:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:64:26)
+
+  9) Lock
+       Withdrawals
+         Validations
+           Should revert with the right error if called from another account:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:72:52)
+
+  10) Lock
+       Withdrawals
+         Validations
+           Shouldn't fail if the unlockTime has arrived and the owner calls it:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:86:38)
+
+  11) Lock
+       Withdrawals
+         Events
+           Should emit an event on withdrawals:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:99:52)
+
+  12) Lock
+       Withdrawals
+         Transfers
+           Should transfer the funds to the owner:
+     HardhatError: HH700: Artifact for contract "Lock" not found. 
+      at Artifacts._handleWrongArtifactForContractName (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:721:11)
+      at Artifacts._getArtifactPathFromFiles (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:852:19)
+      at Artifacts._getArtifactPath (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:516:21)
+      at Artifacts.readArtifact (d:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\hardhat\src\internal\artifacts.ts:71:26)
+      at getContractFactory (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-ethers\src\internal\helpers.ts:120:22)
+      at deployOneYearLockFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:22:18)
+      at loadFixture (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\node_modules\@nomicfoundation\hardhat-network-helpers\src\loadFixture.ts:59:18)
+      at Context.<anonymous> (D:\hackathons & other projects\web3ssh-ASCendant--main\hardhat\test\Lock.js:113:59)
+
+
+
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Solidity and Network Configuration                                                                         Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Solidity: 0.8.20       ┬╖  Optim: false   ┬╖  Runs: 200    ┬╖  viaIR: false   ┬╖     Block: 30,000,000 gas     Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Methods                                                                                                    Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Contracts / Methods    ┬╖  Min            ┬╖  Max          ┬╖  Avg            ┬╖  # calls       ┬╖  usd (avg)   Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  FreelanceEscrow        ┬╖                                                                                   Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|      requestEvaluation  ┬╖              -  ┬╖            -  ┬╖        129,884  ┬╖            14  ┬╖           -  Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|      submitWork         ┬╖              -  ┬╖            -  ┬╖         31,263  ┬╖            16  ┬╖           -  Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  MockFunctionsRouter    ┬╖                                                                                   Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|      fulfillRequest     ┬╖         43,628  ┬╖       94,382  ┬╖         82,967  ┬╖            11  ┬╖           -  Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Deployments                              ┬╖                                 ┬╖  % of limit    ┬╖              Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  FreelanceEscrow        ┬╖      2,348,500  ┬╖    2,348,512  ┬╖      2,348,511  ┬╖         7.8 %  ┬╖           -  Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  MockFunctionsRouter    ┬╖              -  ┬╖            -  ┬╖        777,158  ┬╖         2.6 %  ┬╖           -  Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖|┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Key                                                                                                        Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Γù»  Execution gas for this method does not include intrinsic gas overhead                                   Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Γû│  Cost was non-zero but below the precision setting for the currency display (see options)                Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖
+|  Toolchain:  hardhat                                                                                        Γöé
+┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖┬╖

@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { 
   FileText, 
-  DollarSign, 
   CheckCircle, 
-  XCircle, 
-  Clock, 
-  AlertTriangle,
+  Clock,
+  Sun,
+  Moon, 
   Copy,
   Calendar,
   User,
@@ -17,13 +16,13 @@ import {
   Shield,
   Upload,
   Github,
-  ArrowLeft,
-  Send,
   Brain,
-  FileCheck
+  FileCheck,
+  AlertTriangle,
+  ArrowLeft
 } from 'lucide-react';
 
-type ContractStatus = 'Created' | 'Funded' | 'WorkSubmitted' | 'Approved' | 'Dispute';
+type ContractStatus = 'Created' | 'WorkSubmitted' | 'Evaluating' | 'Resolved';
 
 interface ContractDetails {
   address: string;
@@ -47,6 +46,16 @@ interface CreateContractForm {
 }
 
 function App() {
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  React.useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
   const [contract, setContract] = useState<ContractDetails | null>(null);
 
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -72,13 +81,7 @@ function App() {
     evaluator: 'Gemini AI Evaluation System',
     analysisResult: ''
   });
-  const [showDisputeModal, setShowDisputeModal] = useState(false);
-  const [disputeData, setDisputeData] = useState({
-    reason: '',
-    description: '',
-    requestedChanges: '',
-    evidence: [] as File[]
-  });
+
   const [createForm, setCreateForm] = useState<CreateContractForm>({
     title: '',
     description: '',
@@ -88,11 +91,7 @@ function App() {
     deadline: ''
   });
 
-  const handleStatusChange = (newStatus: ContractStatus) => {
-    if (contract) {
-      setContract(prev => prev ? { ...prev, status: newStatus } : null);
-    }
-  };
+
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -272,7 +271,7 @@ function App() {
     }
   };
 
-  const submitWork = async () => {
+  const submitWork = () => {
     // Validate inputs
     if (!workSubmissionData.githubLink && workSubmissionData.files.length === 0 && workSubmissionData.imageFiles.length === 0 && workSubmissionData.documentFiles.length === 0) {
       alert('Please provide either a GitHub link, upload project files, upload images, or upload documents for analysis');
@@ -289,6 +288,12 @@ function App() {
     
     // Close work submission page
     setShowWorkSubmission(false);
+  };
+
+  const requestEvaluation = async () => {
+    if (!contract || contract.status !== 'WorkSubmitted') return;
+    
+    setContract(prev => prev ? { ...prev, status: 'Evaluating' } : null);
     
     // Start AI analysis
     setAiReport(prev => ({ ...prev, status: 'pending' }));
@@ -315,6 +320,11 @@ function App() {
         analysisResult: analysisResult.analysis_result
       });
 
+      // Oracle callback simulation
+      setTimeout(() => {
+         setContract(prev => prev ? { ...prev, status: 'Resolved' } : null);
+      }, 3000);
+
     } catch (error) {
       setAiReport(prev => ({ ...prev, status: 'failed' }));
       console.error('AI analysis failed:', error);
@@ -331,88 +341,46 @@ function App() {
     });
   };
 
-  const handleDisputeClick = () => {
-    setShowDisputeModal(true);
-  };
 
-  const handleDisputeFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files || []);
-    setDisputeData(prev => ({
-      ...prev,
-      evidence: [...prev.evidence, ...files]
-    }));
-  };
-
-  const removeDisputeFile = (index: number) => {
-    setDisputeData(prev => ({
-      ...prev,
-      evidence: prev.evidence.filter((_, i) => i !== index)
-    }));
-  };
-
-  const submitDispute = () => {
-    // Here you would typically send the dispute data to your backend
-    console.log('Submitting dispute:', disputeData);
-    
-    // Update contract status
-    setContract(prev => prev ? { ...prev, status: 'Dispute' } : null);
-    
-    // Close dispute modal
-    setShowDisputeModal(false);
-    
-    // Reset dispute data
-    setDisputeData({
-      reason: '',
-      description: '',
-      requestedChanges: '',
-      evidence: []
-    });
-  };
 
   const getStatusColor = (status: ContractStatus) => {
     switch (status) {
       case 'Created': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'Funded': return 'bg-green-100 text-green-800 border-green-200';
       case 'WorkSubmitted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'Approved': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
-      case 'Dispute': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'Evaluating': return 'bg-purple-100 text-purple-800 border-purple-200';
+      case 'Resolved': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      default: return 'bg-white/10 dark:bg-black/20 text-title opacity-90 border-white/20 dark:border-white/10';
     }
   };
 
   const getStatusIcon = (status: ContractStatus) => {
     switch (status) {
       case 'Created': return <FileText className="w-4 h-4" />;
-      case 'Funded': return <DollarSign className="w-4 h-4" />;
       case 'WorkSubmitted': return <Clock className="w-4 h-4" />;
-      case 'Approved': return <CheckCircle className="w-4 h-4" />;
-      case 'Dispute': return <AlertTriangle className="w-4 h-4" />;
+      case 'Evaluating': return <Brain className="w-4 h-4" />;
+      case 'Resolved': return <CheckCircle className="w-4 h-4" />;
       default: return <FileText className="w-4 h-4" />;
     }
   };
 
-  const canTransitionTo = (targetStatus: ContractStatus) => {
-    if (!contract) return false;
-    const transitions: Record<ContractStatus, ContractStatus[]> = {
-      'Created': ['Funded', 'Dispute'],
-      'Funded': ['WorkSubmitted', 'Dispute'],
-      'WorkSubmitted': ['Approved', 'Dispute'],
-      'Approved': [],
-      'Dispute': ['Approved', 'WorkSubmitted']
-    };
-    return transitions[contract.status].includes(targetStatus);
-  };
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen liquid-container relative w-full">
       <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
                           <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Smart Contract Management</h1>
-                <p className="text-lg text-gray-600">Monitor and manage smart contracts</p>
+                <h1 className="text-4xl font-bold text-title mb-2">Smart Contract Management</h1>
+                <p className="text-lg text-body">Monitor and manage smart contracts</p>
               </div>
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-3 rounded-full skeuo-button border-none bg-black/10 dark:bg-white/10"
+              >
+                {isDarkMode ? <Sun className="w-6 h-6 text-yellow-500" /> : <Moon className="w-6 h-6 text-blue-900" />}
+              </button>
             <button
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition-colors"
@@ -425,13 +393,13 @@ function App() {
 
         {/* Empty State or Contract Details */}
         {!contract ? (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+          <div className="glass-panel p-8 overflow-hidden mb-8">
             <div className="px-8 py-16 text-center">
-              <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <div className="mx-auto w-24 h-24 bg-white/10 dark:bg-black/20 rounded-full flex items-center justify-center mb-6">
                 <FileText className="w-12 h-12 text-gray-400" />
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">No Contract Created</h3>
-              <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              <h3 className="text-2xl font-bold text-title mb-4">No Contract Created</h3>
+              <p className="text-body mb-8 max-w-md mx-auto">
                 Get started by creating your first smart contract. Click the "Create Contract" button above to begin.
               </p>
               <button
@@ -444,7 +412,7 @@ function App() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden mb-8">
+          <div className="glass-panel p-8 overflow-hidden mb-8">
             {/* Contract Header */}
             <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-white">
               <div className="flex items-center justify-between">
@@ -472,7 +440,7 @@ function App() {
             <div className="px-8 py-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-600">Current Status:</span>
+                  <span className="text-sm font-medium text-body">Current Status:</span>
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium ${getStatusColor(contract.status)}`}>
                     {getStatusIcon(contract.status)}
                     {contract.status}
@@ -482,21 +450,16 @@ function App() {
 
               {/* Action Buttons */}
               <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Contract Actions</h3>
-                                  <div className="flex flex-wrap gap-3">
-                    {(['Created', 'Funded', 'WorkSubmitted', 'Approved', 'Dispute'] as ContractStatus[]).map((status) => (
+                <h3 className="text-lg font-semibold text-title mb-4">Contract State</h3>
+                  <div className="flex flex-wrap gap-3">
+                    {(['Created', 'WorkSubmitted', 'Evaluating', 'Resolved'] as ContractStatus[]).map((status) => (
                       <button
                         key={status}
-                        onClick={() => status === 'Dispute' ? handleDisputeClick() : handleStatusChange(status)}
-                        disabled={!canTransitionTo(status) && status !== contract.status}
+                        disabled={true}
                         className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
                           status === contract.status
-                            ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
-                            : canTransitionTo(status)
-                            ? status === 'Dispute' 
-                              ? 'bg-red-600 text-white hover:bg-red-700 hover:scale-105 hover:shadow-lg'
-                              : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 hover:shadow-lg'
-                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? 'bg-blue-600 text-white shadow-lg'
+                            : 'bg-white/10 dark:bg-black/20 text-gray-400 opacity-70 cursor-not-allowed'
                         }`}
                       >
                         {getStatusIcon(status)}
@@ -506,49 +469,44 @@ function App() {
                   </div>
                 
                 {/* Additional Action Buttons */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <h4 className="text-md font-semibold text-gray-900 mb-4">Work Management</h4>
+                <div className="mt-6 pt-6 border-t border-white/20 dark:border-white/10">
+                  <h4 className="text-md font-semibold text-title mb-4">Work Management</h4>
                   <div className="flex flex-wrap gap-3">
                     <button
                       onClick={handleWorkSubmission}
-                      disabled={!canTransitionTo('WorkSubmitted')}
+                      disabled={contract.status !== 'Created'}
                       className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                        contract.status === 'WorkSubmitted'
-                          ? 'bg-green-100 text-green-700 border border-green-200'
-                          : canTransitionTo('WorkSubmitted')
+                        contract.status === 'Created'
                           ? 'bg-green-600 text-white hover:bg-green-700 hover:scale-105 hover:shadow-lg'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white/10 dark:bg-black/20 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       <FileText className="w-4 h-4" />
-                      {contract.status === 'Dispute' ? 'Resubmit Work' : 'Work Submission'}
+                      Freelancer: Submit Work
                     </button>
                     <button
-                      onClick={() => {
-                        // Open work checking page in new tab
-                        window.open('http://localhost:8501', '_blank');
-                      }}
-                      disabled={contract.status !== 'WorkSubmitted' && contract.status !== 'Approved'}
+                      onClick={requestEvaluation}
+                      disabled={contract.status !== 'WorkSubmitted'}
                       className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                        contract.status === 'WorkSubmitted' || contract.status === 'Approved'
+                        contract.status === 'WorkSubmitted'
                           ? 'bg-purple-600 text-white hover:bg-purple-700 hover:scale-105 hover:shadow-lg'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white/10 dark:bg-black/20 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      <CheckCircle className="w-4 h-4" />
-                      Check Work
+                      <Brain className="w-4 h-4" />
+                      Client: Request AI Evaluation
                     </button>
                     <button
                       onClick={() => setShowReports(true)}
-                      disabled={contract.status !== 'WorkSubmitted' && contract.status !== 'Approved' && contract.status !== 'Dispute'}
+                      disabled={contract.status === 'Created' || contract.status === 'WorkSubmitted'}
                       className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
-                        contract.status === 'WorkSubmitted' || contract.status === 'Approved' || contract.status === 'Dispute'
+                        contract.status === 'Evaluating' || contract.status === 'Resolved'
                           ? 'bg-orange-600 text-white hover:bg-orange-700 hover:scale-105 hover:shadow-lg'
-                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                          : 'bg-white/10 dark:bg-black/20 text-gray-400 cursor-not-allowed'
                       }`}
                     >
                       <FileText className="w-4 h-4" />
-                      Reports
+                      View AI Reports
                     </button>
                   </div>
                 </div>
@@ -558,9 +516,9 @@ function App() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
                                   <div>
-                  <h4 className="text-lg font-semibold text-gray-900 mb-4">Contract Description</h4>
-                  <div className="bg-gray-50 p-4 rounded-xl">
-                    <ul className="text-gray-700 leading-relaxed space-y-2">
+                  <h4 className="text-lg font-semibold text-title mb-4">Contract Description</h4>
+                  <div className="bg-white/5 dark:bg-black/10 p-4 rounded-xl">
+                    <ul className="text-body font-medium leading-relaxed space-y-2">
                       {contract.description.split('\n').filter(item => item.trim()).map((item, index) => (
                         <li key={index} className="flex items-start gap-2">
                           <span className="text-blue-600 font-bold mt-1">•</span>
@@ -572,17 +530,17 @@ function App() {
                 </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h4>
+                    <h4 className="text-lg font-semibold text-title mb-4">Timeline</h4>
                     <div className="space-y-3">
                       <div className="flex items-center gap-3 text-sm">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-gray-700">Created:</span>
-                        <span className="text-gray-600">{contract.createdDate}</span>
+                        <Calendar className="w-4 h-4 text-body opacity-80" />
+                        <span className="font-medium text-body font-medium">Created:</span>
+                        <span className="text-body">{contract.createdDate}</span>
                       </div>
                       <div className="flex items-center gap-3 text-sm">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <span className="font-medium text-gray-700">Deadline:</span>
-                        <span className="text-gray-600">{contract.deadline}</span>
+                        <Clock className="w-4 h-4 text-body opacity-80" />
+                        <span className="font-medium text-body font-medium">Deadline:</span>
+                        <span className="text-body">{contract.deadline}</span>
                       </div>
                     </div>
                   </div>
@@ -591,18 +549,18 @@ function App() {
                 <div className="space-y-6">
                   <div>
                     <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-lg font-semibold text-gray-900">Parties</h4>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <h4 className="text-lg font-semibold text-title">Parties</h4>
+                      <div className="flex items-center gap-2 text-sm text-body">
                         <Shield className="w-4 h-4" />
                         <span>Privacy Controls</span>
                       </div>
                     </div>
                     <div className="space-y-4">
-                      <div className="bg-gray-50 p-4 rounded-xl">
+                      <div className="bg-white/5 dark:bg-black/10 p-4 rounded-xl">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-500" />
-                            <span className="font-medium text-gray-700">Client</span>
+                            <User className="w-4 h-4 text-body opacity-80" />
+                            <span className="font-medium text-body font-medium">Client</span>
                           </div>
                           <button
                             onClick={() => setShowClientAddress(!showClientAddress)}
@@ -615,7 +573,7 @@ function App() {
                         <div className="flex items-center gap-2">
                           {showClientAddress ? (
                             <>
-                              <span className="font-mono text-sm text-gray-600">{contract.client}</span>
+                              <span className="font-mono text-sm text-body">{contract.client}</span>
                               <button
                                 onClick={() => copyToClipboard(contract.client, 'client')}
                                 className="p-1 hover:bg-gray-200 rounded transition-colors"
@@ -625,7 +583,7 @@ function App() {
                             </>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm text-gray-600">
+                              <span className="font-mono text-sm text-body">
                                 {contract.client.substring(0, 6)}...{contract.client.substring(contract.client.length - 4)}
                               </span>
                               <button
@@ -638,11 +596,11 @@ function App() {
                           )}
                         </div>
                       </div>
-                      <div className="bg-gray-50 p-4 rounded-xl">
+                      <div className="bg-white/5 dark:bg-black/10 p-4 rounded-xl">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <User className="w-4 h-4 text-gray-500" />
-                            <span className="font-medium text-gray-700">Contractor</span>
+                            <User className="w-4 h-4 text-body opacity-80" />
+                            <span className="font-medium text-body font-medium">Contractor</span>
                           </div>
                           <button
                             onClick={() => setShowContractorAddress(!showContractorAddress)}
@@ -655,7 +613,7 @@ function App() {
                         <div className="flex items-center gap-2">
                           {showContractorAddress ? (
                             <>
-                              <span className="font-mono text-sm text-gray-600">{contract.contractor}</span>
+                              <span className="font-mono text-sm text-body">{contract.contractor}</span>
                               <button
                                 onClick={() => copyToClipboard(contract.contractor, 'contractor')}
                                 className="p-1 hover:bg-gray-200 rounded transition-colors"
@@ -665,7 +623,7 @@ function App() {
                             </>
                           ) : (
                             <div className="flex items-center gap-2">
-                              <span className="font-mono text-sm text-gray-600">
+                              <span className="font-mono text-sm text-body">
                                 {contract.contractor.substring(0, 6)}...{contract.contractor.substring(contract.contractor.length - 4)}
                               </span>
                               <button
@@ -682,11 +640,69 @@ function App() {
                   </div>
 
                   <div>
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">Contract Value</h4>
-                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
+                    <h4 className="text-lg font-semibold text-title mb-4">Contract Value</h4>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200 mb-4">
                       <div className="text-3xl font-bold text-green-800">{contract.value}</div>
                       <div className="text-sm text-green-600 mt-1">Total Contract Value</div>
                     </div>
+                    {contract.status === 'Resolved' && (
+                      <div className="glass-panel p-5 relative overflow-hidden border-none shadow-none">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                        <h5 className="font-semibold text-title mb-3 flex items-center gap-2">
+                          <Brain className="w-5 h-5 text-blue-600" />
+                          AI Triggered Settlement
+                        </h5>
+                        <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+                          <span className="text-sm font-medium text-body">Gemini 2.5 Pro Score</span>
+                          <span className="text-xl font-black text-blue-600">{aiReport.score}/100</span>
+                        </div>
+                        <div className="space-y-3">
+                          {aiReport.score < 50 ? (
+                            <div className="p-4 bg-red-50 text-red-800 rounded-xl text-sm border border-red-100">
+                              <div className="font-bold mb-2 flex items-center gap-2">
+                                <AlertTriangle className="w-4 h-4 text-red-600" />
+                                Score &lt; 50: Development Unacceptable
+                              </div>
+                              <div className="flex justify-between items-center text-red-700 font-medium">
+                                <span>Client Refund:</span>
+                                <span>100% ({contract.value})</span>
+                              </div>
+                            </div>
+                          ) : aiReport.score >= 90 ? (
+                            <div className="p-4 bg-green-50 text-green-800 rounded-xl text-sm border border-green-100">
+                              <div className="font-bold mb-2 flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                Score &ge; 90: Excellent Delivery
+                              </div>
+                              <div className="flex justify-between items-center text-green-700 font-medium">
+                                <span>Freelancer Payout:</span>
+                                <span>100% ({contract.value})</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="p-4 bg-indigo-50 text-indigo-800 rounded-xl text-sm border border-indigo-100">
+                              <div className="font-bold mb-3">Score {aiReport.score}: Proportional Split</div>
+                              
+                              <div className="w-full bg-indigo-200 rounded-full h-3 mb-3 flex overflow-hidden">
+                                <div className="bg-green-500 h-3 transition-all duration-1000" style={{ width: `${aiReport.score}%` }}></div>
+                                <div className="bg-orange-400 h-3 transition-all duration-1000" style={{ width: `${100 - aiReport.score}%` }}></div>
+                              </div>
+                              
+                              <div className="flex justify-between mt-2 text-xs font-semibold">
+                                <div className="flex flex-col">
+                                  <span className="text-green-700">Freelancer</span>
+                                  <span className="text-green-800 text-sm mt-0.5">{aiReport.score}%</span>
+                                </div>
+                                <div className="flex flex-col text-right">
+                                  <span className="text-orange-700">Client Refund</span>
+                                  <span className="text-orange-800 text-sm mt-0.5">{100 - aiReport.score}%</span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -696,14 +712,14 @@ function App() {
 
         {/* Create Contract Modal */}
         {showCreateModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="glass-panel max-w-4xl shadow-none max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-900">Create New Contract</h2>
+                  <h2 className="text-2xl font-bold text-title">Create New Contract</h2>
                   <button
                     onClick={() => setShowCreateModal(false)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-white/10 dark:bg-black/20 rounded-lg transition-colors"
                   >
                     <X className="w-6 h-6" />
                   </button>
@@ -712,38 +728,38 @@ function App() {
                 <div className="space-y-6">
                   {/* Contract Title */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Contract Title
                     </label>
                     <input
                       type="text"
                       value={createForm.title}
                       onChange={(e) => handleFormChange('title', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="Enter contract title"
                     />
                   </div>
 
                   {/* Contract Description */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Contract Description
                     </label>
                     <textarea
                       value={createForm.description}
                       onChange={(e) => handleFormChange('description', e.target.value)}
                       rows={6}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="Enter each point on a new line:&#10;• Frontend development with React&#10;• Backend API with Node.js&#10;• Database integration with PostgreSQL&#10;• Testing and deployment"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-body opacity-80 mt-1">
                       Enter each bullet point on a separate line. You can start with "•" or just write the text.
                     </p>
                   </div>
 
                   {/* Contract Value */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Contract Value (ETH)
                     </label>
                     <div className="relative">
@@ -753,53 +769,53 @@ function App() {
                         min="0"
                         value={createForm.value.replace(' ETH', '')}
                         onChange={(e) => handleFormChange('value', e.target.value + ' ETH')}
-                        className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 pr-12 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="0.00"
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <span className="text-gray-500 font-medium">ETH</span>
+                        <span className="text-body opacity-80 font-medium">ETH</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Client Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Client Address
                     </label>
                     <input
                       type="text"
                       value={createForm.client}
                       onChange={(e) => handleFormChange('client', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0x..."
                     />
                   </div>
 
                   {/* Contractor Address */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Contractor Address
                     </label>
                     <input
                       type="text"
                       value={createForm.contractor}
                       onChange={(e) => handleFormChange('contractor', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0x..."
                     />
                   </div>
 
                   {/* Deadline */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Deadline
                     </label>
                     <input
                       type="date"
                       value={createForm.deadline}
                       onChange={(e) => handleFormChange('deadline', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
 
@@ -807,7 +823,7 @@ function App() {
                   <div className="flex gap-4 pt-4">
                     <button
                       onClick={() => setShowCreateModal(false)}
-                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                      className="flex-1 px-6 py-3 border border-white/20 dark:border-white/10 text-body font-medium rounded-xl font-medium hover:bg-white/5 dark:bg-black/10 transition-colors"
                     >
                       Cancel
                     </button>
@@ -827,42 +843,31 @@ function App() {
 
         {/* Work Submission Page */}
         {showWorkSubmission && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="glass-panel max-w-4xl shadow-none max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setShowWorkSubmission(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-white/10 dark:bg-black/20 rounded-lg transition-colors"
                     >
                       <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h2 className="text-2xl font-bold text-gray-900">
-                      {contract?.status === 'Dispute' ? 'Work Resubmission' : 'Work Submission'}
+                    <h2 className="text-2xl font-bold text-title">
+                      Work Submission
                     </h2>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-body opacity-80">
                     Contract: {contract?.title}
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  {/* Resubmission Context */}
-                  {contract?.status === 'Dispute' && (
-                    <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-                      <h4 className="text-sm font-medium text-yellow-900 mb-2">Resubmission Context</h4>
-                      <p className="text-sm text-yellow-800">
-                        You are resubmitting work after a dispute was raised. Please address the issues mentioned in the dispute 
-                        and provide updated work that resolves the concerns. This resubmission will be evaluated against the 
-                        original requirements and the dispute feedback.
-                      </p>
-                    </div>
-                  )}
 
                   {/* GitHub Link */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       GitHub Repository Link
                     </label>
                     <div className="relative">
@@ -870,21 +875,21 @@ function App() {
                         type="url"
                         value={workSubmissionData.githubLink}
                         onChange={(e) => setWorkSubmissionData(prev => ({ ...prev, githubLink: e.target.value }))}
-                        className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-3 pl-12 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://github.com/username/repository"
                       />
                       <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                         <Github className="w-5 h-5 text-gray-400" />
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs text-body opacity-80 mt-1">
                       Provide the GitHub repository URL for AI evaluation
                     </p>
                   </div>
 
                   {/* Requirements File Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       <FileCheck className="w-4 h-4 inline mr-2" />
                       Upload Requirement Files *
                     </label>
@@ -899,10 +904,10 @@ function App() {
                       />
                       <label htmlFor="requirement-file-upload" className="cursor-pointer">
                         <FileCheck className="w-12 h-12 text-orange-400 mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
+                        <p className="text-lg font-medium text-body font-medium mb-2">
                           Upload requirement documents
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-body opacity-80">
                           Upload PDF, Word, or text files containing project requirements for AI analysis
                         </p>
                       </label>
@@ -911,13 +916,13 @@ function App() {
                     {/* Requirement File List */}
                     {workSubmissionData.requirementFiles.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700">Uploaded Requirement Files:</h4>
+                        <h4 className="text-sm font-medium text-body font-medium">Uploaded Requirement Files:</h4>
                         {workSubmissionData.requirementFiles.map((file, index) => (
                           <div key={index} className="flex items-center justify-between bg-orange-50 p-3 rounded-lg border border-orange-200">
                             <div className="flex items-center gap-2">
                               <FileCheck className="w-4 h-4 text-orange-500" />
-                              <span className="text-sm text-gray-700">{file.name}</span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-sm text-body font-medium">{file.name}</span>
+                              <span className="text-xs text-body opacity-80">
                                 ({(file.size / 1024 / 1024).toFixed(2)} MB)
                               </span>
                             </div>
@@ -935,7 +940,7 @@ function App() {
 
                   {/* Image Files Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       <Upload className="w-4 h-4 inline mr-2" />
                       Upload Visual Assets (Screenshots, UI Mockups, etc.)
                     </label>
@@ -950,10 +955,10 @@ function App() {
                       />
                       <label htmlFor="image-file-upload" className="cursor-pointer">
                         <Upload className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
+                        <p className="text-lg font-medium text-body font-medium mb-2">
                           Upload visual assets for analysis
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-body opacity-80">
                           Upload screenshots, UI mockups, or any visual deliverables for AI comparison
                         </p>
                       </label>
@@ -962,13 +967,13 @@ function App() {
                     {/* Image File List */}
                     {workSubmissionData.imageFiles.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700">Uploaded Visual Assets:</h4>
+                        <h4 className="text-sm font-medium text-body font-medium">Uploaded Visual Assets:</h4>
                         {workSubmissionData.imageFiles.map((file, index) => (
                           <div key={index} className="flex items-center justify-between bg-purple-50 p-3 rounded-lg border border-purple-200">
                             <div className="flex items-center gap-2">
                               <Upload className="w-4 h-4 text-purple-500" />
-                              <span className="text-sm text-gray-700">{file.name}</span>
-                              <span className="text-xs text-gray-500">
+                              <span className="text-sm text-body font-medium">{file.name}</span>
+                              <span className="text-xs text-body opacity-80">
                                 ({(file.size / 1024 / 1024).toFixed(2)} MB)
                               </span>
                             </div>
@@ -986,11 +991,11 @@ function App() {
 
                   {/* Document Files Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       <Upload className="w-4 h-4 inline mr-2" />
                       Upload Document Files (Optional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
+                    <div className="border-2 border-dashed border-white/20 dark:border-white/10 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
                       <input
                         type="file"
                         multiple
@@ -1001,10 +1006,10 @@ function App() {
                       />
                       <label htmlFor="document-file-upload" className="cursor-pointer">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
+                        <p className="text-lg font-medium text-body font-medium mb-2">
                           Drop files here or click to upload
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-body opacity-80">
                           Upload additional document files, reports, or any relevant materials
                         </p>
                       </label>
@@ -1013,13 +1018,13 @@ function App() {
                     {/* Document File List */}
                     {workSubmissionData.documentFiles.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700">Uploaded Document Files:</h4>
+                        <h4 className="text-sm font-medium text-body font-medium">Uploaded Document Files:</h4>
                         {workSubmissionData.documentFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div key={index} className="flex items-center justify-between bg-white/5 dark:bg-black/10 p-3 rounded-lg">
                             <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-700">{file.name}</span>
-                              <span className="text-xs text-gray-500">
+                              <FileText className="w-4 h-4 text-body opacity-80" />
+                              <span className="text-sm text-body font-medium">{file.name}</span>
+                              <span className="text-xs text-body opacity-80">
                                 ({(file.size / 1024 / 1024).toFixed(2)} MB)
                               </span>
                             </div>
@@ -1037,11 +1042,11 @@ function App() {
 
                   {/* Project Files Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       <Upload className="w-4 h-4 inline mr-2" />
                       Attach Project Files (Optional)
                     </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
+                    <div className="border-2 border-dashed border-white/20 dark:border-white/10 rounded-xl p-6 text-center hover:border-blue-400 transition-colors">
                       <input
                         type="file"
                         multiple
@@ -1051,10 +1056,10 @@ function App() {
                       />
                       <label htmlFor="file-upload" className="cursor-pointer">
                         <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
+                        <p className="text-lg font-medium text-body font-medium mb-2">
                           Drop files here or click to upload
                         </p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-body opacity-80">
                           Upload additional project files, documentation, or any relevant materials
                         </p>
                       </label>
@@ -1063,13 +1068,13 @@ function App() {
                     {/* File List */}
                     {workSubmissionData.files.length > 0 && (
                       <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700">Uploaded Project Files:</h4>
+                        <h4 className="text-sm font-medium text-body font-medium">Uploaded Project Files:</h4>
                         {workSubmissionData.files.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                          <div key={index} className="flex items-center justify-between bg-white/5 dark:bg-black/10 p-3 rounded-lg">
                             <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-700">{file.name}</span>
-                              <span className="text-xs text-gray-500">
+                              <FileText className="w-4 h-4 text-body opacity-80" />
+                              <span className="text-sm text-body font-medium">{file.name}</span>
+                              <span className="text-xs text-body opacity-80">
                                 ({(file.size / 1024 / 1024).toFixed(2)} MB)
                               </span>
                             </div>
@@ -1087,14 +1092,14 @@ function App() {
 
                   {/* Additional Description */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-body font-medium mb-2">
                       Additional Description
                     </label>
                     <textarea
                       value={workSubmissionData.description}
                       onChange={(e) => setWorkSubmissionData(prev => ({ ...prev, description: e.target.value }))}
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                      className="w-full px-4 py-3 border border-white/20 dark:border-white/10 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                       placeholder="Provide additional context about your work, implementation details, or any special considerations for AI evaluation..."
                     />
                   </div>
@@ -1125,7 +1130,7 @@ function App() {
                   <div className="flex gap-4 pt-4">
                     <button
                       onClick={() => setShowWorkSubmission(false)}
-                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                      className="flex-1 px-6 py-3 border border-white/20 dark:border-white/10 text-body font-medium rounded-xl font-medium hover:bg-white/5 dark:bg-black/10 transition-colors"
                     >
                       Cancel
                     </button>
@@ -1135,7 +1140,7 @@ function App() {
                       className="flex-1 px-6 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <Brain className="w-4 h-4" />
-                      {contract?.status === 'Dispute' ? 'Resubmit for Gemini AI Evaluation' : 'Submit for Gemini AI Evaluation'}
+                      Submit for Gemini AI Evaluation
                     </button>
                   </div>
                 </div>
@@ -1146,20 +1151,20 @@ function App() {
 
         {/* AI Reports Modal */}
         {showReports && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/40 backdrop-blur-md flex items-center justify-center z-50">
+            <div className="glass-panel max-w-4xl shadow-none max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
               <div className="p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setShowReports(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      className="p-2 hover:bg-white/10 dark:bg-black/20 rounded-lg transition-colors"
                     >
                       <ArrowLeft className="w-6 h-6" />
                     </button>
-                    <h2 className="text-2xl font-bold text-gray-900">AI Evaluation Reports</h2>
+                    <h2 className="text-2xl font-bold text-title">AI Evaluation Reports</h2>
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-body opacity-80">
                     Contract: {contract?.title}
                   </div>
                 </div>
@@ -1168,7 +1173,7 @@ function App() {
                   {/* Report Status */}
                   <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-xl border border-blue-200">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold text-gray-900">Evaluation Status</h3>
+                      <h3 className="text-lg font-semibold text-title">Evaluation Status</h3>
                       <div className={`px-3 py-1 rounded-full text-sm font-medium ${
                         aiReport.status === 'completed' 
                           ? 'bg-green-100 text-green-800' 
@@ -1182,15 +1187,15 @@ function App() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="text-center">
                         <div className="text-2xl font-bold text-blue-600">{aiReport.score}/100</div>
-                        <div className="text-sm text-gray-600">Overall Score</div>
+                        <div className="text-sm text-body">Overall Score</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-semibold text-gray-900">{aiReport.evaluationDate || 'Pending'}</div>
-                        <div className="text-sm text-gray-600">Evaluation Date</div>
+                        <div className="text-lg font-semibold text-title">{aiReport.evaluationDate || 'Pending'}</div>
+                        <div className="text-sm text-body">Evaluation Date</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-lg font-semibold text-gray-900">{aiReport.evaluator}</div>
-                        <div className="text-sm text-gray-600">Evaluator</div>
+                        <div className="text-lg font-semibold text-title">{aiReport.evaluator}</div>
+                        <div className="text-sm text-body">Evaluator</div>
                       </div>
                     </div>
                   </div>
@@ -1199,10 +1204,10 @@ function App() {
                   {aiReport.status === 'completed' && (
                     <div className="space-y-4">
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 mb-3">Gemini AI Analysis Report</h4>
-                        <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <h4 className="text-lg font-semibold text-title mb-3">Gemini AI Analysis Report</h4>
+                        <div className="bg-white/5 dark:bg-black/10 p-4 rounded-xl border border-white/20 dark:border-white/10">
                           <div className="prose prose-sm max-w-none">
-                            <pre className="whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
+                            <pre className="whitespace-pre-wrap text-body font-medium leading-relaxed font-sans">
                               {aiReport.analysisResult || aiReport.feedback || 'No detailed analysis available yet.'}
                             </pre>
                           </div>
@@ -1211,17 +1216,17 @@ function App() {
 
                       {/* Recommendations */}
                       <div>
-                        <h4 className="text-lg font-semibold text-gray-900 mb-3">Key Recommendations</h4>
+                        <h4 className="text-lg font-semibold text-title mb-3">Key Recommendations</h4>
                         <div className="space-y-2">
                           {aiReport.recommendations.length > 0 ? (
                             aiReport.recommendations.map((rec, index) => (
                               <div key={index} className="flex items-start gap-3 bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border border-blue-200">
                                 <span className="text-blue-600 font-bold mt-1">•</span>
-                                <span className="text-gray-700">{rec}</span>
+                                <span className="text-body font-medium">{rec}</span>
                               </div>
                             ))
                           ) : (
-                            <div className="text-gray-500 text-center py-4">
+                            <div className="text-body opacity-80 text-center py-4">
                               No recommendations available
                             </div>
                           )}
@@ -1236,9 +1241,9 @@ function App() {
                       <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                       <div className="flex items-center justify-center gap-2 mb-4">
                         <Brain className="w-6 h-6 text-blue-600" />
-                        <h3 className="text-lg font-semibold text-gray-900">Gemini AI Analysis in Progress</h3>
+                        <h3 className="text-lg font-semibold text-title">Gemini AI Analysis in Progress</h3>
                       </div>
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-body mb-4">
                         Gemini AI is analyzing your GitHub repository against the uploaded requirements. This process typically takes 3-5 minutes.
                       </p>
                       <div className="bg-blue-50 p-3 rounded-lg max-w-md mx-auto">
@@ -1255,8 +1260,8 @@ function App() {
                       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <AlertTriangle className="w-8 h-8 text-red-600" />
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Evaluation Failed</h3>
-                      <p className="text-gray-600">
+                      <h3 className="text-lg font-semibold text-title mb-2">Evaluation Failed</h3>
+                      <p className="text-body">
                         The AI evaluation encountered an error. Please try resubmitting your work.
                       </p>
                     </div>
@@ -1266,7 +1271,7 @@ function App() {
                   <div className="flex gap-4 pt-4">
                     <button
                       onClick={() => setShowReports(false)}
-                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
+                      className="flex-1 px-6 py-3 border border-white/20 dark:border-white/10 text-body font-medium rounded-xl font-medium hover:bg-white/5 dark:bg-black/10 transition-colors"
                     >
                       Close
                     </button>
@@ -1278,158 +1283,6 @@ function App() {
                         Download Report
                       </button>
                     )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Dispute Modal */}
-        {showDisputeModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-              <div className="p-8">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-4">
-                    <button
-                      onClick={() => setShowDisputeModal(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ArrowLeft className="w-6 h-6" />
-                    </button>
-                    <h2 className="text-2xl font-bold text-gray-900">Raise Dispute</h2>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Contract: {contract?.title}
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  {/* Dispute Reason */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Reason for Dispute *
-                    </label>
-                    <select
-                      value={disputeData.reason}
-                      onChange={(e) => setDisputeData(prev => ({ ...prev, reason: e.target.value }))}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      <option value="">Select a reason</option>
-                      <option value="incomplete-work">Incomplete Work</option>
-                      <option value="poor-quality">Poor Quality</option>
-                      <option value="not-delivered">Work Not Delivered</option>
-                      <option value="wrong-implementation">Wrong Implementation</option>
-                      <option value="missing-features">Missing Features</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-
-                  {/* Detailed Description */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Detailed Description *
-                    </label>
-                    <textarea
-                      value={disputeData.description}
-                      onChange={(e) => setDisputeData(prev => ({ ...prev, description: e.target.value }))}
-                      rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                      placeholder="Provide a detailed description of what work is not done, what issues you've encountered, or what specific problems need to be addressed..."
-                    />
-                  </div>
-
-                  {/* Requested Changes */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Requested Changes
-                    </label>
-                    <textarea
-                      value={disputeData.requestedChanges}
-                      onChange={(e) => setDisputeData(prev => ({ ...prev, requestedChanges: e.target.value }))}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
-                      placeholder="Describe what specific changes or improvements you need from the contractor..."
-                    />
-                  </div>
-
-                  {/* Evidence Upload */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Supporting Evidence
-                    </label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-red-400 transition-colors">
-                      <input
-                        type="file"
-                        multiple
-                        onChange={handleDisputeFileUpload}
-                        className="hidden"
-                        id="dispute-file-upload"
-                      />
-                      <label htmlFor="dispute-file-upload" className="cursor-pointer">
-                        <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700 mb-2">
-                          Upload evidence files
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Screenshots, documents, or any files that support your dispute
-                        </p>
-                      </label>
-                    </div>
-                    
-                    {/* Evidence File List */}
-                    {disputeData.evidence.length > 0 && (
-                      <div className="mt-4 space-y-2">
-                        <h4 className="text-sm font-medium text-gray-700">Uploaded Evidence:</h4>
-                        {disputeData.evidence.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
-                            <div className="flex items-center gap-2">
-                              <FileText className="w-4 h-4 text-gray-500" />
-                              <span className="text-sm text-gray-700">{file.name}</span>
-                              <span className="text-xs text-gray-500">
-                                ({(file.size / 1024 / 1024).toFixed(2)} MB)
-                              </span>
-                            </div>
-                            <button
-                              onClick={() => removeDisputeFile(index)}
-                              className="text-red-500 hover:text-red-700 transition-colors"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Dispute Information */}
-                  <div className="bg-red-50 p-4 rounded-xl border border-red-200">
-                    <h4 className="text-sm font-medium text-red-900 mb-2">Important Information</h4>
-                    <ul className="text-sm text-red-800 space-y-1">
-                      <li>• Disputes will be reviewed by our team within 24-48 hours</li>
-                      <li>• Provide clear evidence to support your claim</li>
-                      <li>• Be specific about what work is missing or incorrect</li>
-                      <li>• Contract may be paused during dispute resolution</li>
-                    </ul>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-4 pt-4">
-                    <button
-                      onClick={() => setShowDisputeModal(false)}
-                      className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={submitDispute}
-                      disabled={!disputeData.reason || !disputeData.description}
-                      className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      <AlertTriangle className="w-4 h-4" />
-                      Submit Dispute
-                    </button>
                   </div>
                 </div>
               </div>

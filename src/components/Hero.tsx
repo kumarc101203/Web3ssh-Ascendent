@@ -1,7 +1,9 @@
 import React from 'react';
 import { ArrowRight, Shield, Zap, Brain, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 via-purple-50 to-pink-50 min-h-screen flex items-center">
       {/* Animated background elements */}
@@ -43,11 +45,15 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
-            <button className="group bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-bold hover:from-blue-700 hover:via-blue-800 hover:to-purple-800 transition-all duration-300 flex items-center justify-center space-x-3 shadow-2xl shadow-blue-500/30 hover:shadow-3xl hover:shadow-blue-500/50 transform hover:scale-105 hover:-translate-y-1">
+            <button 
+              onClick={() => navigate('/services')}
+              className="group bg-gradient-to-r from-blue-600 via-blue-700 to-purple-700 text-white px-10 py-5 rounded-2xl text-lg font-bold hover:from-blue-700 hover:via-blue-800 hover:to-purple-800 transition-all duration-300 flex items-center justify-center space-x-3 shadow-2xl shadow-blue-500/30 hover:shadow-3xl hover:shadow-blue-500/50 transform hover:scale-105 hover:-translate-y-1">
               <span>Find Services</span>
               <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="group border-2 border-gray-300 text-gray-700 px-10 py-5 rounded-2xl text-lg font-bold hover:border-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 bg-white/80 backdrop-blur-sm">
+            <button 
+              onClick={() => navigate('/signup')}
+              className="group border-2 border-gray-300 text-gray-700 px-10 py-5 rounded-2xl text-lg font-bold hover:border-blue-500 hover:text-blue-700 hover:bg-blue-50 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 bg-white/80 backdrop-blur-sm">
               Become a Freelancer
             </button>
           </div>

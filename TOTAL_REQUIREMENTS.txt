@@ -1,0 +1,45 @@
+# ============================================================
+# 🌐 Web3SSH-Ascendant: Master Installation Checklist
+# ============================================================
+# This file lists ALL necessary packages for a first-time user.
+
+# 🟢 1. PROJECT PREREQUISITES
+# ------------------------------------------------------------
+- Node.js (v18.0 or higher)
+- Python (v3.10.0 or higher)
+- MetaMask Browser Extension
+- A valid Google Gemini API Key (or OpenAI Key)
+
+# 🔵 2. FRONTEND (Vite + React + TS)
+# ------------------------------------------------------------
+# These are handled by 'npm install', but for reference:
+- react ^18.3.1
+- react-dom ^18.3.1
+- react-router-dom ^6.20.1
+- ethers ^6.16.0 (Blockchain interaction)
+- firebase ^11.10.0 (Optional backup auth)
+- lucide-react ^0.344.0 (Icons)
+- tailwindcss ^3.4.1 (Styling)
+- vite ^5.4.2 (Development server)
+
+# ⚪ 3. BACKEND (Python FastAPI)
+# ------------------------------------------------------------
+# Run 'pip install -r smart-contract-UI/backend/requirements.txt'
+- fastapi == 0.104.1
+- uvicorn == 0.24.0
+- python-multipart == 0.0.6
+- requests == 2.31.0
+- python-dotenv == 1.0.0
+- google-generativeai == 0.3.2
+- pydantic == 2.5.2
+
+# 🔴 4. SMART CONTRACTS (Hardhat)
+# ------------------------------------------------------------
+# In the 'hardhat/' folder if you are deploying contracts:
+- @nomicfoundation/hardhat-toolbox
+- @chainlink/contracts (For oracle integration)
+- solidity ^0.8.0
+
+# ============================================================
+# FINAL STEP: Create your .env file with your API keys!
+# ============================================================

@@ -1,0 +1,16 @@
+# 🖼️ Frontend (Vite + React + TS) Installation Guide
+# ------------------------------------------------------------
+# The primary installation command is: npm install
+
+# KEY DEPENDENCIES (Frozen v1.0)
+- ethers == 6.16.0 (Web3 / Blockchain interaction)
+- firebase == 11.10.0 (Authentication & Logic Support)
+- lucide-react == 0.344.0 (Icons)
+- react == 18.3.1
+- react-dom == 18.3.1
+- react-router-dom == 6.20.1 (Navigation)
+- tailwindcss == 3.4.1 (Styling layer)
+- autoprefixer == 10.4.18
+- postcss == 8.4.35
+- typescript == 5.5.3
+- vite == 5.4.2 (Development & Build Tool)
